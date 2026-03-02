@@ -65,10 +65,17 @@ const convertFiltersToEventParams = (filters: TypedBackendFilter[]): Partial<Get
 
 type PropertyFilterRow = { id: string; key: string; value: string };
 
+/** Encode key/value so ':' and ';' do not break the key:value; serialization format. */
+const encodePropertyFilterSegment = (s: string): string => s.replace(/%/g, '%25').replace(/:/g, '%3A').replace(/;/g, '%3B');
+
 const buildPropertyFiltersString = (rows: PropertyFilterRow[]): string | undefined => {
 	const pairs = rows
 		.filter((r) => (r.key ?? '').trim() && (r.value ?? '').trim())
-		.map((r) => `${(r.key ?? '').trim()}:${(r.value ?? '').trim()}`);
+		.map((r) => {
+			const key = (r.key ?? '').trim();
+			const value = (r.value ?? '').trim();
+			return `${encodePropertyFilterSegment(key)}:${encodePropertyFilterSegment(value)}`;
+		});
 	if (pairs.length === 0) return undefined;
 	return `${pairs.join(';')};`;
 };

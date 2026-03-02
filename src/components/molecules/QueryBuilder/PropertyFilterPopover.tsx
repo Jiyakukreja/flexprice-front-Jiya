@@ -53,7 +53,7 @@ const getDefaultValueByFieldType = (field: FilterField) => {
 		case FilterFieldType.DATEPICKER:
 			return { valueDate: undefined };
 		case FilterFieldType.COMBOBOX:
-			return { valueArray: [field.options?.[0]?.value || ''] };
+			return { valueString: field.options?.[0]?.value || '' };
 		case FilterFieldType.CHECKBOX:
 		case FilterFieldType.SWITCH:
 			return { valueBoolean: false };
@@ -338,14 +338,14 @@ const PropertyFilterPopover: React.FC<Props> = ({
 							</div>
 
 							<div className='overflow-y-auto max-h-[min(60vh,400px)] flex flex-col gap-1.5'>
-								<Sortable value={value} onValueChange={handleReorder} getItemValue={(item) => item.field}>
+								<Sortable value={value} onValueChange={handleReorder} getItemValue={(item) => item.id}>
 									<SortableContent className='flex flex-col gap-1'>
 										{value.map((filter, index) => {
 											const field = fields.find((f) => f.field === filter.field);
 											if (!field) return null;
 
 											return (
-												<SortableItem key={filter.id} value={filter.field}>
+												<SortableItem key={filter.id} value={filter.id}>
 													<div
 														className={cn(
 															'grid items-center',
