@@ -1,5 +1,5 @@
 import { AddButton, Page, ActionButton, Chip } from '@/components/atoms';
-import { ApiDocsContent, FeatureDrawer } from '@/components/molecules';
+import { ApiDocsContent, FeatureDrawer, RedirectCell } from '@/components/molecules';
 import { ColumnData } from '@/components/molecules/Table';
 import { QueryableDataArea } from '@/components/organisms';
 import { RouteNames } from '@/core/routes/Routes';
@@ -138,6 +138,17 @@ const FeaturesPage = () => {
 				fieldName: 'name',
 				title: 'Feature Name',
 			},
+			{
+				title: 'Group',
+				render: (row) =>
+					row?.group?.id ? <RedirectCell redirectUrl={`${RouteNames.groups}/${row.group.id}`}>{row.group.name}</RedirectCell> : '—',
+			},
+			// {
+			// 	title: 'Customer',
+			// 	render: (row) => (
+			// 		<RedirectCell redirectUrl={`${RouteNames.customers}/${row.customer_id}`}>{row.customer?.name || row.customer_id}</RedirectCell>
+			// 	),
+			// },
 			{
 				title: 'Type',
 				render(row) {
