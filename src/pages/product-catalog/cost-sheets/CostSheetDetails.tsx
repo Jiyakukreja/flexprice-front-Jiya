@@ -8,6 +8,8 @@ import { Price } from '@/models/Price';
 import { ENTITY_STATUS } from '@/models';
 import { useBreadcrumbsStore } from '@/store/useBreadcrumbsStore';
 import CostSheetApi from '@/api/CostSheetApi';
+import { PriceApi } from '@/api/PriceApi';
+import { PRICE_ENTITY_TYPE } from '@/models/Price';
 import { getPriceTypeLabel } from '@/utils/common/helper_functions';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { EyeOff, Plus, Pencil } from 'lucide-react';
@@ -117,15 +119,35 @@ const CostSheetDetails = () => {
 	});
 
 	const { updateBreadcrumb } = useBreadcrumbsStore();
-	const { limit, offset } = usePagination({
+	const { limit, offset, setPage } = usePagination({
 		initialLimit: 10,
 		prefix: PAGINATION_PREFIX.COST_SHEET_CHARGES,
 	});
 
-	const paginatedPrices = useMemo(() => {
-		const prices = costSheetData?.prices ?? [];
-		return prices.slice(offset, offset + limit);
-	}, [costSheetData?.prices, offset, limit]);
+	const { data: pricesResponse, isLoading: pricesLoading } = useQuery({
+		queryKey: ['costSheetCharges', id, limit, offset],
+		queryFn: () =>
+			PriceApi.searchPrices({
+				entity_ids: [id!],
+				entity_type: PRICE_ENTITY_TYPE.COST_SHEET,
+				limit,
+				offset,
+			}),
+		enabled: !!id && !!costSheetData,
+	});
+
+	const paginatedPrices = useMemo(() => pricesResponse?.items ?? [], [pricesResponse?.items]);
+	const totalCharges = pricesResponse?.pagination?.total ?? 0;
+
+	// Clamp page when total shrinks so we never show an empty table when charges exist
+	useEffect(() => {
+		if (totalCharges === 0) return;
+		const maxOffset = Math.max(0, Math.floor((totalCharges - 1) / limit) * limit);
+		if (offset > maxOffset) {
+			const lastPage = Math.max(1, Math.ceil(totalCharges / limit));
+			setPage(lastPage);
+		}
+	}, [totalCharges, limit, offset, setPage]);
 
 	useEffect(() => {
 		if (costSheetData?.name) {
@@ -187,14 +209,21 @@ const CostSheetDetails = () => {
 				data={costSheetData}
 				open={costSheetDrawerOpen}
 				onOpenChange={setCostSheetDrawerOpen}
-				refetchQueryKeys={['fetchCostSheet']}
+				refetchQueryKeys={['fetchCostSheet', 'costSheetCharges']}
 			/>
 			<ApiDocsContent tags={[...API_DOCS_TAGS.Costs]} />
 			<div className='space-y-6'>
 				<DetailsCard variant='stacked' title='Cost Sheet Details' data={costSheetDetails} />
 
-				{/* cost sheet charges table */}
-				{(costSheetData?.prices?.length ?? 0) > 0 ? (
+				{/* cost sheet charges table (prices from Price API by cost sheet id) */}
+				{pricesLoading ? (
+					<Card variant='notched'>
+						<CardHeader title='Charges' />
+						<div className='p-8 flex justify-center'>
+							<Loader />
+						</div>
+					</Card>
+				) : totalCharges > 0 ? (
 					<Card variant='notched'>
 						<CardHeader
 							title='Charges'
@@ -205,7 +234,7 @@ const CostSheetDetails = () => {
 							}
 						/>
 						<FlexpriceTable columns={chargeColumns} data={paginatedPrices} />
-						<ShortPagination unit='charges' totalItems={costSheetData?.prices?.length ?? 0} prefix={PAGINATION_PREFIX.COST_SHEET_CHARGES} />
+						<ShortPagination unit='charges' totalItems={totalCharges} prefix={PAGINATION_PREFIX.COST_SHEET_CHARGES} />
 					</Card>
 				) : (
 					<NoDataCard
