@@ -119,7 +119,7 @@ const CostSheetDetails = () => {
 	});
 
 	const { updateBreadcrumb } = useBreadcrumbsStore();
-	const { limit, offset, setPage } = usePagination({
+	const { limit, offset } = usePagination({
 		initialLimit: 10,
 		prefix: PAGINATION_PREFIX.COST_SHEET_CHARGES,
 	});
@@ -138,16 +138,6 @@ const CostSheetDetails = () => {
 
 	const paginatedPrices = useMemo(() => pricesResponse?.items ?? [], [pricesResponse?.items]);
 	const totalCharges = pricesResponse?.pagination?.total ?? 0;
-
-	// Clamp page when total shrinks so we never show an empty table when charges exist
-	useEffect(() => {
-		if (totalCharges === 0) return;
-		const maxOffset = Math.max(0, Math.floor((totalCharges - 1) / limit) * limit);
-		if (offset > maxOffset) {
-			const lastPage = Math.max(1, Math.ceil(totalCharges / limit));
-			setPage(lastPage);
-		}
-	}, [totalCharges, limit, offset, setPage]);
 
 	useEffect(() => {
 		if (costSheetData?.name) {
