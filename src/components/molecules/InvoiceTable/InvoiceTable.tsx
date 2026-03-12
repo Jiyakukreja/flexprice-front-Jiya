@@ -11,7 +11,7 @@ export interface Props {
 	data: Invoice[];
 }
 
-const getStatusChip = (status: string) => {
+export const getStatusChip = (status: string) => {
 	switch (status.toUpperCase()) {
 		case INVOICE_STATUS.VOIDED:
 			return <Chip variant='default' label='Void' />;

@@ -117,12 +117,12 @@ export type { CreateIntegrationRequest, LinkedinIntegrationResponse, Integration
 
 export type {
 	GetInvoicesResponse,
-	GetAllInvoicesPayload,
+	InvoiceFilter,
+	UpdatePaymentStatusPayload,
 	UpdateInvoiceStatusPayload,
 	GetInvoicePreviewPayload,
 	CreateInvoicePayload,
 	GetInvoicePdfPayload,
-	GetInvoicesByFiltersPayload,
 	VoidInvoicePayload,
 	RecalculateInvoiceResponse,
 } from './InvoiceApi';

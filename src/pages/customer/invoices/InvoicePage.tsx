@@ -247,9 +247,9 @@ const InvoicesPage = () => {
 				}}
 				dataConfig={{
 					queryKey: 'fetchInvoices',
-					fetchFn: async (params) => InvoiceApi.getInvoicesByFilters(params),
+					fetchFn: async (params) => InvoiceApi.listInvoices(params),
 					probeFetchFn: async (params) =>
-						InvoiceApi.getInvoicesByFilters({
+						InvoiceApi.listInvoices({
 							...params,
 							limit: 1,
 							offset: 0,
