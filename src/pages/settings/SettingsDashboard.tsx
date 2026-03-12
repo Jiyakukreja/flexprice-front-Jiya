@@ -50,7 +50,7 @@ function MembersSection() {
 		prefix: PAGINATION_PREFIX.SETTINGS_MEMBERS,
 	});
 
-	const { data, isLoading, isError } = useQuery({
+	const { data, isLoading, isError, refetch } = useQuery({
 		queryKey: [...MEMBERS_QUERY_KEY, page, limit, offset],
 		queryFn: () => UserApi.getTenantMembers({ limit, offset }),
 	});
@@ -58,6 +58,8 @@ function MembersSection() {
 	useEffect(() => {
 		if (isError) toast.error('Failed to load members');
 	}, [isError]);
+
+	const isValidEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value);
 
 	const createUser = useMutation({
 		mutationFn: (payload: { type: 'user'; email: string }) => UserApi.createTenantUser(payload),
@@ -83,6 +85,11 @@ function MembersSection() {
 		setAddError(null);
 		if (!trimmed) {
 			toast.error('Enter an email address');
+			return;
+		}
+		if (!isValidEmail(trimmed)) {
+			setAddError('Please enter a valid email address');
+			toast.error('Please enter a valid email address');
 			return;
 		}
 		createUser.mutate({ type: 'user', email: trimmed });
@@ -126,6 +133,14 @@ function MembersSection() {
 			<Card variant='default' className='rounded-[6px]'>
 				<CardHeader title='Members' cta={<AddButton label='Add' onClick={() => setAddOpen(true)} />} />
 				{isLoading && <Loader />}
+				{!isLoading && isError && (
+					<div className='flex flex-col items-center justify-center gap-3 py-8 text-center'>
+						<p className='text-sm text-red-600'>Failed to load members. Please try again.</p>
+						<Button variant='outline' onClick={() => refetch()}>
+							Retry
+						</Button>
+					</div>
+				)}
 				{!isLoading && !isError && (
 					<>
 						<FlexpriceTable columns={columns} data={members} showEmptyRow />
