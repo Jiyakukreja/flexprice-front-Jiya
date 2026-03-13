@@ -10,7 +10,6 @@ import CostSheetApi from '@/api/CostSheetApi';
 import FeatureApi from '@/api/FeatureApi';
 import { Feature } from '@/models';
 import { GetUsageAnalyticsRequest, GetCostAnalyticsRequest } from '@/types';
-import { WindowSize } from '@/models';
 import { RedirectCell } from '@/components/molecules';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/molecules/Table/Table';
 import { UsageAnalyticItem, PRICE_ENTITY_TYPE } from '@/models';
@@ -58,7 +57,6 @@ const CustomerAnalyticsTab = () => {
 
 		const params: GetUsageAnalyticsRequest = {
 			external_customer_id: customer.external_id,
-			window_size: WindowSize.DAY,
 		};
 
 		if (selectedFeatures.length > 0) {
@@ -84,7 +82,6 @@ const CustomerAnalyticsTab = () => {
 
 		const params: GetCostAnalyticsRequest = {
 			external_customer_id: customer.external_id,
-			expand: ['meter', 'price'],
 		};
 
 		if (selectedFeatures.length > 0) {
