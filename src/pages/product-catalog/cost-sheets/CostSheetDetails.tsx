@@ -13,7 +13,7 @@ import { PRICE_ENTITY_TYPE } from '@/models/Price';
 import { getPriceTypeLabel } from '@/utils/common/helper_functions';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { EyeOff, Plus, Pencil } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router';
 import { Card } from '@/components/atoms';
@@ -136,9 +136,6 @@ const CostSheetDetails = () => {
 		enabled: !!id && !!costSheetData,
 	});
 
-	const paginatedPrices = useMemo(() => pricesResponse?.items ?? [], [pricesResponse?.items]);
-	const totalCharges = pricesResponse?.pagination?.total ?? 0;
-
 	useEffect(() => {
 		if (costSheetData?.name) {
 			updateBreadcrumb(2, costSheetData.name);
@@ -213,7 +210,7 @@ const CostSheetDetails = () => {
 							<Loader />
 						</div>
 					</Card>
-				) : totalCharges > 0 ? (
+				) : (pricesResponse?.pagination?.total ?? 0) > 0 ? (
 					<Card variant='notched'>
 						<CardHeader
 							title='Charges'
@@ -223,8 +220,12 @@ const CostSheetDetails = () => {
 								</Button>
 							}
 						/>
-						<FlexpriceTable columns={chargeColumns} data={paginatedPrices} />
-						<ShortPagination unit='charges' totalItems={totalCharges} prefix={PAGINATION_PREFIX.COST_SHEET_CHARGES} />
+						<FlexpriceTable columns={chargeColumns} data={pricesResponse?.items ?? []} />
+						<ShortPagination
+							unit='charges'
+							totalItems={pricesResponse?.pagination?.total ?? 0}
+							prefix={PAGINATION_PREFIX.COST_SHEET_CHARGES}
+						/>
 					</Card>
 				) : (
 					<NoDataCard
