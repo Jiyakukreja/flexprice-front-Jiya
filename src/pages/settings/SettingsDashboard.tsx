@@ -125,18 +125,25 @@ function MembersSection() {
 		{ title: 'Email', fieldName: 'email' },
 		{
 			title: 'Role',
-			render: (row) => getRoleDisplay(row),
+			render: (row) => {
+				const role = getRoleDisplay(row);
+				return <span className='inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600'>{role}</span>;
+			},
 		},
 	];
 
 	return (
 		<>
-			<Card variant='default' className='rounded-[6px]'>
-				<CardHeader title='Members' cta={<AddButton label='Add' onClick={() => setAddOpen(true)} />} />
+			<Card variant='default' className='rounded-xl border-gray-200 shadow-sm bg-white'>
+				<CardHeader
+					title='Members'
+					titleClassName='text-lg font-medium text-zinc-800'
+					cta={<AddButton label='Add' variant='outline' onClick={() => setAddOpen(true)} />}
+				/>
 				{isLoading && <Loader />}
 				{!isLoading && isError && (
 					<div className='flex flex-col items-center justify-center gap-3 py-8 text-center'>
-						<p className='text-sm text-red-600'>Failed to load members. Please try again.</p>
+						<p className='text-sm text-red-700'>Failed to load members. Please try again.</p>
 						<Button variant='outline' onClick={() => refetch()}>
 							Retry
 						</Button>
@@ -144,24 +151,32 @@ function MembersSection() {
 				)}
 				{!isLoading && !isError && (
 					<>
-						<FlexpriceTable columns={columns} data={members} showEmptyRow />
-						<ShortPagination
-							prefix={PAGINATION_PREFIX.SETTINGS_MEMBERS}
-							unit='members'
-							totalItems={totalMembers}
-							pageSize={MEMBERS_PAGE_SIZE}
-						/>
+						<div className='border-t border-gray-100 pt-4 -mx-6 px-6'>
+							<FlexpriceTable columns={columns} data={members} showEmptyRow />
+							<div className='text-zinc-500'>
+								<ShortPagination
+									prefix={PAGINATION_PREFIX.SETTINGS_MEMBERS}
+									unit='members'
+									totalItems={totalMembers}
+									pageSize={MEMBERS_PAGE_SIZE}
+								/>
+							</div>
+						</div>
 					</>
 				)}
 			</Card>
 
 			{/* Add member dialog */}
-			<Dialog isOpen={addOpen} onOpenChange={handleAddDialogOpenChange} title='Add member' className='sm:max-w-[425px]'>
+			<Dialog
+				isOpen={addOpen}
+				onOpenChange={handleAddDialogOpenChange}
+				title='Add member'
+				className='sm:max-w-[425px] rounded-xl shadow-lg border border-gray-100'>
 				<div className='grid gap-4 mt-3'>
 					{addError && (
-						<div className='w-full flex items-center gap-2.5 rounded-md border border-red-300 bg-red-50 px-3 py-2.5' role='alert'>
+						<div className='w-full flex items-center gap-2.5 rounded-md border border-red-200 bg-red-50 px-3 py-2.5' role='alert'>
 							<AlertTriangle className='h-4 w-4 flex-shrink-0 text-red-600' />
-							<span className='text-sm font-medium text-red-800 leading-relaxed'>{addError}</span>
+							<span className='text-sm font-medium text-red-700 leading-relaxed'>{addError}</span>
 						</div>
 					)}
 					<div className='grid gap-2'>
@@ -191,7 +206,7 @@ function MembersSection() {
 				isOpen={passwordDialogOpen}
 				onOpenChange={(open) => (open ? setPasswordDialogOpen(true) : handleClosePasswordDialog())}
 				title='Login Credentials'
-				className='w-full max-w-[520px] border border-gray-200 shadow-xl'>
+				className='w-full max-w-[520px] rounded-xl shadow-lg border border-gray-100'>
 				<div className='space-y-5 mt-3'>
 					{addedUserEmail && (
 						<div className='flex items-center gap-3 rounded-lg bg-blue-50 px-4 py-3 border border-blue-200'>
@@ -254,8 +269,9 @@ function MembersSection() {
 
 const SettingsDashboard = () => {
 	return (
-		<Page heading='Settings' documentTitle='Settings'>
+		<Page heading='Settings' documentTitle='Settings' headingClassName='font-semibold text-2xl text-zinc-900'>
 			<FlatTabs
+				className='[&_.border-b]:border-gray-200'
 				tabs={[
 					{
 						value: 'team',
