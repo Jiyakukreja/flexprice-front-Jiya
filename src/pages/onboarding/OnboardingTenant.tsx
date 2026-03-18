@@ -125,7 +125,7 @@ const OnboardingTenant = () => {
 		onSuccess: async () => {
 			await refetchQueries(['user', 'tenant']);
 			toast.success("You're all set!");
-			navigate(RouteNames.home, { replace: true });
+			navigate(RouteNames.pricing, { replace: true });
 		},
 		onError: (error: ServerError) => {
 			toast.error(error.error?.message || 'Failed to complete onboarding. Please try again.');
