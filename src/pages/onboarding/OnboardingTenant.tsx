@@ -27,6 +27,9 @@ const isValidUrl = (s: string): boolean => {
 	}
 };
 
+/** Banned substrings for organization names; extend as needed. */
+const BANNED_ORG_NAME_WORDS = ['test', 'demo', 'flexprice'];
+
 const teamSizeOptions: SelectOption[] = [
 	{ value: '1-10', label: '1-10' },
 	{ value: '11-20', label: '11-20' },
@@ -67,7 +70,6 @@ const OnboardingTenant = () => {
 	const [teamSize, setTeamSize] = useState('');
 	const [referralSource, setReferralSource] = useState('');
 	const [pricingType, setPricingType] = useState('');
-	const [prefilledTenant, setPrefilledTenant] = useState(false);
 	const [errors, setErrors] = useState<{
 		orgName?: string;
 		orgUrl?: string;
@@ -84,12 +86,10 @@ const OnboardingTenant = () => {
 	});
 
 	useEffect(() => {
-		if (!tenant || prefilledTenant) return;
-		setOrgName((n) => n || tenant.name || '');
+		if (!tenant) return;
 		const url = (tenant.metadata as Record<string, string> | undefined)?.onboarding_org_url;
 		if (url) setOrgUrl((u) => u || url);
-		setPrefilledTenant(true);
-	}, [tenant, prefilledTenant]);
+	}, [tenant]);
 
 	const isValidTeamSize = Boolean(teamSize);
 	const isValidReferral = Boolean(referralSource);
@@ -113,6 +113,7 @@ const OnboardingTenant = () => {
 			await OnboardingApi.recordOnboardingData({
 				orgName: orgName.trim(),
 				orgUrl: orgUrl.trim(),
+				website: orgUrl.trim(),
 				role: isValidRole ? role : '',
 				teamSize: isValidTeamSize ? teamSize : '',
 				referralSource,
@@ -150,9 +151,17 @@ const OnboardingTenant = () => {
 		const trimmedOrgName = orgName.trim();
 		if (!trimmedOrgName) {
 			next.orgName = 'Organization name is required';
-		} else if (trimmedOrgName.toLowerCase() === 'flexprice') {
-			next.orgName = "Oops! That's us. Please enter your organization name instead.";
-			toast("That's us - enter your organization name.", { icon: '😅' });
+		} else {
+			const lowerName = trimmedOrgName.toLowerCase();
+			if (lowerName === 'flexprice') {
+				next.orgName = "Oops! That's us. Please enter your organization name instead.";
+				toast("That's us, please enter your organization name.", { icon: '😅' });
+			} else {
+				const bannedMatch = BANNED_ORG_NAME_WORDS.find((word) => lowerName.includes(word.toLowerCase()));
+				if (bannedMatch) {
+					next.orgName = `Organization name cannot include the word “${bannedMatch}”. Please choose another name.`;
+				}
+			}
 		}
 		if (!isValidReferral) next.referralSource = 'Please select how you found us';
 		const trimmedOrgUrl = orgUrl.trim();
@@ -186,7 +195,7 @@ const OnboardingTenant = () => {
 				</div>
 				<h1 className='text-center text-2xl font-semibold text-zinc-900'>Welcome to Flexprice</h1>
 				<p className='mt-2 text-center text-sm text-zinc-500'>
-					Let&apos;s finish setting up your workspace—complete this form to get started.
+					Let&apos;s finish setting up your workspace, complete this form to get started.
 				</p>
 				<div className='mt-6 space-y-4'>
 					<div className='space-y-1'>
