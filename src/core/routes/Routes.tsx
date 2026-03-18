@@ -65,6 +65,7 @@ import {
 	Query as QueryPage,
 	// Developer pages
 	DeveloperPage,
+	PaddleCheckoutDemo,
 	ServiceAccountsPage,
 	WorkflowsPage,
 	WorkflowDetailsPage,
@@ -162,6 +163,7 @@ export const RouteNames = {
 	serviceAccounts: '/developers/service-accounts',
 	workflows: '/developers/workflows',
 	workflowDetails: '/developers/workflows/:workflowId/:runId',
+	paddleCheckout: '/developers/paddle-checkout',
 
 	// tools routes
 	tools: '/tools',
@@ -505,6 +507,10 @@ export const MainRouter = createBrowserRouter([
 					{
 						path: RouteNames.workflowDetails,
 						element: <WorkflowDetailsPage />,
+					},
+					{
+						path: RouteNames.paddleCheckout,
+						element: <PaddleCheckoutDemo />,
 					},
 				],
 			},
