@@ -65,6 +65,7 @@ import {
 	Query as QueryPage,
 	// Developer pages
 	DeveloperPage,
+	PaddleCheckoutDemo,
 	ServiceAccountsPage,
 	WorkflowsPage,
 	WorkflowDetailsPage,
@@ -88,6 +89,8 @@ import {
 	ErrorPage,
 	DashboardPage,
 	CustomerPortalWrapper,
+	// Checkout
+	CheckoutPage,
 } from '@/pages';
 import { RouterErrorElement } from '@/components/atoms/ErrorBoundary';
 
@@ -162,6 +165,7 @@ export const RouteNames = {
 	serviceAccounts: '/developers/service-accounts',
 	workflows: '/developers/workflows',
 	workflowDetails: '/developers/workflows/:workflowId/:runId',
+	paddleCheckout: '/developers/paddle-checkout',
 
 	// tools routes
 	tools: '/tools',
@@ -180,6 +184,9 @@ export const RouteNames = {
 	onboarding: '/onboarding',
 	settings: '/settings',
 	customerBilling: '/settings/billing',
+
+	// checkout (public - for invoice payments)
+	checkout: '/checkout',
 };
 
 const DefaultRoute = () => {
@@ -216,6 +223,10 @@ export const MainRouter = createBrowserRouter([
 		element: <CustomerPortalWrapper />,
 	},
 	{
+		path: RouteNames.checkout,
+		element: <CheckoutPage />,
+   },
+   {
 		path: RouteNames.onboarding,
 		element: <OnboardingTenant />,
 	},
@@ -505,6 +516,10 @@ export const MainRouter = createBrowserRouter([
 					{
 						path: RouteNames.workflowDetails,
 						element: <WorkflowDetailsPage />,
+					},
+					{
+						path: RouteNames.paddleCheckout,
+						element: <PaddleCheckoutDemo />,
 					},
 				],
 			},
