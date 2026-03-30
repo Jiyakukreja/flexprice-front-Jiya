@@ -239,11 +239,18 @@ const Revenue = () => {
 									className='pl-8 h-8 text-[13px] border-gray-200 bg-gray-50 focus:bg-white placeholder:text-gray-400'
 								/>
 							</div>
-							{search.trim() && (
+							<div className='flex items-center gap-4'>
+								{search.trim() && (
+									<p className='text-[12px] text-gray-400'>
+										{filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''}
+									</p>
+								)}
 								<p className='text-[12px] text-gray-400'>
-									{filteredItems.length} result{filteredItems.length !== 1 ? 's' : ''}
+									{start.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+									{' – '}
+									{end.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
 								</p>
-							)}
+							</div>
 						</div>
 						<Table>
 							<TableHeader className='h-10 bg-gray-50 border-b border-gray-200 rounded-t-md'>
