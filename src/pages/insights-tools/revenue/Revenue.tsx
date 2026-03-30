@@ -386,7 +386,7 @@ const RevenueBarChart = ({ title, data, type }: { title: string; data: RevenueDa
 						<XAxis dataKey='label' tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickMargin={8} />
 						<YAxis tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: '#71717a' }} tickFormatter={formatYAxis} width={64} />
 						<Tooltip
-							cursor={{ fill: '#f4f4f5' }}
+							cursor={false}
 							formatter={formatTooltip}
 							contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: 13 }}
 						/>
