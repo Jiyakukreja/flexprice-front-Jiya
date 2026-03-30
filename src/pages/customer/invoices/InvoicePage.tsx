@@ -197,8 +197,13 @@ const InvoicesPage = () => {
 	const columns: ColumnData<Invoice>[] = useMemo(
 		() => [
 			{
-				fieldName: 'invoice_number',
-				title: 'Invoice ID',
+				title: 'Invoice Number',
+				render: (row: Invoice) =>
+					row.invoice_status?.toUpperCase() === INVOICE_STATUS.DRAFT ? (
+						<span className='text-gray-400 italic text-[13px]'>To be generated</span>
+					) : (
+						<span>{row.invoice_number || '--'}</span>
+					),
 			},
 			{
 				title: 'Amount',
