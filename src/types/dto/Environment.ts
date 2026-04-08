@@ -12,3 +12,14 @@ export interface CreateEnvironmentPayload {
 export interface ListEnvironmentResponse extends Pagination {
 	environments: Environment[];
 }
+
+export interface CloneEnvironmentPayload {
+	name: string;
+	type: ENVIRONMENT_TYPE.DEVELOPMENT | ENVIRONMENT_TYPE.PRODUCTION;
+}
+
+export interface CloneEnvironmentResponse {
+	workflow_id: string;
+	run_id: string;
+	message: string;
+}
