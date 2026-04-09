@@ -1,7 +1,7 @@
 import { PlanType } from '@/constants/planTypes';
 import type { PricingCardProps } from '@/components/molecules/PricingCard/PricingCard';
 import { normalizePricingSchema } from './llm';
-import type { PricingSchema, PricingPlan } from './types';
+import type { PricingCreditGrant, PricingSchema, PricingPlan } from './types';
 
 // ============================================
 // Display type inference
@@ -27,9 +27,23 @@ export function schemaToPricingCardProps(schema: PricingSchema): PricingCardProp
 	const normalized = normalizePricingSchema(schema);
 	const featureMap = new Map(normalized.features.map((f) => [f.key, f]));
 
+	const grantsByPlan = new Map<string, PricingCreditGrant[]>();
+	for (const g of normalized.credit_grants ?? []) {
+		const list = grantsByPlan.get(g.plan_name) ?? [];
+		list.push(g);
+		grantsByPlan.set(g.plan_name, list);
+	}
+
 	return normalized.plans.map((plan, index) => {
 		const displayType = getPlanDisplayType(plan);
 		const firstPrice = plan.prices[0];
+
+		const creditGrantsForPlan = (grantsByPlan.get(plan.name) ?? []).map((g) => ({
+			name: g.name,
+			credits: g.credits,
+			cadence: g.cadence,
+			period: g.period ?? null,
+		}));
 
 		const usageCharges = (plan.usage_charges ?? []).map((charge) => ({
 			amount: String(charge.amount_per_unit),
@@ -66,6 +80,7 @@ export function schemaToPricingCardProps(schema: PricingSchema): PricingCardProp
 			},
 			usageCharges,
 			entitlements,
+			creditGrants: creditGrantsForPlan,
 			showUsageCharges: usageCharges.length > 0,
 			isPreview: true,
 		};

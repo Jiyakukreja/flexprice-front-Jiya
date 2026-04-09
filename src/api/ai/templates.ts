@@ -7,7 +7,10 @@ import { PricingSchema } from './types';
 export interface TemplateDefinition {
 	label: string;
 	subtitle: string;
+	/** Fallback text icon (used if iconSrc not provided). */
 	icon: string;
+	/** Optional logo to render inside template picker. */
+	iconSrc?: string;
 	/** Simple natural-language text shown (read-only) in the textarea when selected. */
 	displayPrompt: string;
 	/** Exact schema — skips the LLM entirely. */
@@ -923,6 +926,7 @@ export const PRICING_TEMPLATES: TemplateDefinition[] = [
 		label: 'Railway',
 		subtitle: 'Infra',
 		icon: '◉',
+		iconSrc: '/assets/railwaylogo.png',
 		displayPrompt: `Please build me Railway's pricing. This is a credit-based system where 1 credit = $0.01.
 
 Resource costs (in credits):
@@ -941,6 +945,7 @@ Plans:
 		label: 'Cursor',
 		subtitle: 'Agentic AI',
 		icon: '⌘',
+		iconSrc: '/assets/cursor logo.png',
 		displayPrompt: `Please build me Cursor's pricing.
 
 - Free plan: 50 agent requests/month, 200 tab completions/month. Overage at $0.08/request and $0.01/completion.
@@ -953,6 +958,7 @@ Plans:
 		label: 'Gemini',
 		subtitle: 'Model Provider',
 		icon: '✦',
+		iconSrc: '/assets/gemini logo.png',
 		displayPrompt: `Please build me Google Gemini's API pricing.
 
 There is a free tier with free input and output tokens on Gemini 2.5 Flash-Lite and Gemini 2.5 Flash.
@@ -967,6 +973,7 @@ There is a free tier with free input and output tokens on Gemini 2.5 Flash-Lite 
 		label: 'Apollo',
 		subtitle: 'Credits + Sales',
 		icon: '◎',
+		iconSrc: '/assets/apollo logo.png',
 		displayPrompt: `Please build me Apollo.io-style credit-based pricing.
 
 - Starter at $49/month with 1,200 credits per month.
@@ -984,6 +991,7 @@ Credits are consumed per action:
 		label: 'Vapi',
 		subtitle: 'Voice AI',
 		icon: '◈',
+		iconSrc: '/assets/vapilogo.png',
 		displayPrompt: `Please build me Vapi's pricing.
 
 Single plan: Vapi Pay As You Go ($0/month platform fee).

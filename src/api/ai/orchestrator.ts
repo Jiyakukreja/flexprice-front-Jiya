@@ -156,12 +156,26 @@ async function createPlanCreditGrantsIfNeeded(
 // Orchestrator — creates all Flexprice entities from a PricingSchema
 // ============================================
 
+/** Minimum time each progress step stays visible so the checklist does not flash past. */
+const MIN_PROGRESS_STEP_MS = 1900;
+
+async function waitMinStepElapsed(startedAt: number): Promise<void> {
+	const elapsed = Date.now() - startedAt;
+	if (elapsed < MIN_PROGRESS_STEP_MS) {
+		await new Promise<void>((resolve) => setTimeout(resolve, MIN_PROGRESS_STEP_MS - elapsed));
+	}
+}
+
 export async function orchestrateSetup(schema: PricingSchema, onProgress?: ProgressCallback): Promise<void> {
 	const normalized = normalizePricingSchema(schema);
 	assertValidPricingSchema(normalized);
 
+	const hasEntitlements = normalized.plans.some((p) => p.entitlements.length > 0);
+	const hasCreditGrants = (normalized.credit_grants ?? []).length > 0;
+
 	// Step 1 — Create features (upsert: pre-check by lookup_key, create only if missing)
 	onProgress?.('creating_features');
+	let stepStart = Date.now();
 	const featureIdMap: Record<string, string> = {};
 	const featureTypeMap: Record<string, FEATURE_TYPE> = {};
 	const featureMeterIdMap: Record<string, string> = {};
@@ -217,8 +231,11 @@ export async function orchestrateSetup(schema: PricingSchema, onProgress?: Progr
 		}
 	}
 
+	await waitMinStepElapsed(stepStart);
+
 	// Step 2 — Create plans (upsert: pre-check by lookup_key + name, create if missing)
 	onProgress?.('creating_plans');
+	stepStart = Date.now();
 	const planIdMap: Record<string, string> = {};
 	const planLookupKeys = buildUniquePlanLookupKeys(normalized.plans);
 
@@ -254,8 +271,11 @@ export async function orchestrateSetup(schema: PricingSchema, onProgress?: Progr
 		}
 	}
 
+	await waitMinStepElapsed(stepStart);
+
 	// Step 3 — Flat subscription prices + usage-based (metered) charges
 	onProgress?.('creating_prices');
+	stepStart = Date.now();
 
 	for (const plan of normalized.plans) {
 		const planId = planIdMap[plan.name];
@@ -312,47 +332,58 @@ export async function orchestrateSetup(schema: PricingSchema, onProgress?: Progr
 		}
 	}
 
+	await waitMinStepElapsed(stepStart);
+
 	// Step 4 — Create entitlements (capped metered + static limits only; never unlimited metered)
-	onProgress?.('creating_entitlements');
+	if (hasEntitlements) {
+		onProgress?.('creating_entitlements');
+		stepStart = Date.now();
 
-	for (const plan of normalized.plans) {
-		const planId = planIdMap[plan.name];
-		if (!planId) continue;
-		const planBillingPeriod = plan.prices[0]?.billing_period ?? 'monthly';
+		for (const plan of normalized.plans) {
+			const planId = planIdMap[plan.name];
+			if (!planId) continue;
+			const planBillingPeriod = plan.prices[0]?.billing_period ?? 'monthly';
 
-		const existingEntitlements = await EntitlementApi.search({
-			entity_type: ENTITLEMENT_ENTITY_TYPE.PLAN,
-			entity_ids: [planId],
-			limit: 100,
-		});
-		const existingFeatureIds = new Set(existingEntitlements.items?.map((e) => e.feature_id) ?? []);
-
-		for (const ent of plan.entitlements) {
-			const featureId = featureIdMap[ent.feature_key];
-			const featureType = featureTypeMap[ent.feature_key];
-			if (!featureId || !featureType) continue;
-			if (existingFeatureIds.has(featureId)) continue;
-
-			const isStatic = featureType === FEATURE_TYPE.STATIC;
-
-			await EntitlementApi.create({
+			const existingEntitlements = await EntitlementApi.search({
 				entity_type: ENTITLEMENT_ENTITY_TYPE.PLAN,
-				entity_id: planId,
-				feature_id: featureId,
-				feature_type: featureType,
-				is_enabled: true,
-				...(isStatic
-					? { static_value: ent.is_unlimited ? 'unlimited' : String(ent.value ?? 'true') }
-					: {
-							usage_limit: ent.is_unlimited ? null : (ent.value ?? null),
-							usage_reset_period: billingPeriodToResetPeriod(planBillingPeriod),
-							is_soft_limit: false,
-						}),
+				entity_ids: [planId],
+				limit: 100,
 			});
+			const existingFeatureIds = new Set(existingEntitlements.items?.map((e) => e.feature_id) ?? []);
+
+			for (const ent of plan.entitlements) {
+				const featureId = featureIdMap[ent.feature_key];
+				const featureType = featureTypeMap[ent.feature_key];
+				if (!featureId || !featureType) continue;
+				if (existingFeatureIds.has(featureId)) continue;
+
+				const isStatic = featureType === FEATURE_TYPE.STATIC;
+
+				await EntitlementApi.create({
+					entity_type: ENTITLEMENT_ENTITY_TYPE.PLAN,
+					entity_id: planId,
+					feature_id: featureId,
+					feature_type: featureType,
+					is_enabled: true,
+					...(isStatic
+						? { static_value: ent.is_unlimited ? 'unlimited' : String(ent.value ?? 'true') }
+						: {
+								usage_limit: ent.is_unlimited ? null : (ent.value ?? null),
+								usage_reset_period: billingPeriodToResetPeriod(planBillingPeriod),
+								is_soft_limit: false,
+							}),
+				});
+			}
 		}
+
+		await waitMinStepElapsed(stepStart);
 	}
 
-	await createPlanCreditGrantsIfNeeded(normalized.credit_grants ?? [], planIdMap, onProgress);
+	if (hasCreditGrants) {
+		stepStart = Date.now();
+		await createPlanCreditGrantsIfNeeded(normalized.credit_grants ?? [], planIdMap, onProgress);
+		await waitMinStepElapsed(stepStart);
+	}
 
 	onProgress?.('done');
 }
