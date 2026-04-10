@@ -361,6 +361,7 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 						commitment_amount: subscriptionDetails?.commitment_amount,
 						overage_factor: subscriptionDetails?.overage_factor,
 						commitment_duration: subscriptionDetails?.commitment_duration,
+						currency: subscriptionDetails?.currency,
 					}}
 				/>
 

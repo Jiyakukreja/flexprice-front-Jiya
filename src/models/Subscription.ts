@@ -11,6 +11,7 @@ export interface SubscriptionCommitmentInfo {
 	commitment_amount?: number;
 	overage_factor?: number;
 	commitment_duration?: string;
+	currency?: string;
 }
 
 export interface LineItem extends BaseModel {

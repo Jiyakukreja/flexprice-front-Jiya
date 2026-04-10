@@ -6,7 +6,7 @@ import { LineItem, SUBSCRIPTION_LINE_ITEM_ENTITY_TYPE } from '@/models/Subscript
 import { FC, useState, useCallback, useMemo } from 'react';
 import { Trash2, Pencil, Info } from 'lucide-react';
 import { ENTITY_STATUS } from '@/models/base';
-import { formatBillingPeriodForDisplay, getPriceTypeLabel } from '@/utils/common/helper_functions';
+import { formatBillingPeriodForDisplay, getCurrencySymbol, getPriceTypeLabel } from '@/utils/common/helper_functions';
 import { PRICE_ENTITY_TYPE, PRICE_TYPE, PRICE_STATUS } from '@/models/Price';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
 import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
@@ -196,7 +196,7 @@ const formatCommitmentTooltip = (info: SubscriptionCommitmentInfo): React.ReactN
 		rows.push(
 			<div key='amount' className='flex items-center gap-2'>
 				<span className='text-xs font-medium text-gray-500'>Commitment Amount</span>
-				<span className='text-sm font-medium'>${info.commitment_amount}</span>
+				<span className='text-sm font-medium'>{`${getCurrencySymbol(info.currency ?? '')}${info.commitment_amount}`}</span>
 			</div>,
 		);
 	}
@@ -320,7 +320,10 @@ const SubscriptionLineItemTable: FC<Props> = ({
 								delayDuration={0}
 								sideOffset={5}
 								className='bg-white border border-gray-200 shadow-lg text-sm text-gray-900 px-4 py-3 rounded-[6px] max-w-[320px]'>
-								<button type='button' data-interactive='true' className='inline-flex items-center focus:outline-none'>
+								<button
+									type='button'
+									data-interactive='true'
+									className='inline-flex items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500'>
 									<Info className='h-4 w-4 text-blue-500 flex-shrink-0' />
 								</button>
 							</Tooltip>
