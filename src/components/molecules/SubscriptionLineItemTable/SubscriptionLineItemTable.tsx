@@ -7,7 +7,7 @@ import { FC, useState, useCallback, useMemo } from 'react';
 import { Trash2, Pencil, Info } from 'lucide-react';
 import { ENTITY_STATUS } from '@/models/base';
 import { formatBillingPeriodForDisplay, getCurrencySymbol, getPriceTypeLabel } from '@/utils/common/helper_functions';
-import { PRICE_ENTITY_TYPE, PRICE_TYPE, PRICE_STATUS } from '@/models/Price';
+import { PRICE_ENTITY_TYPE, PRICE_STATUS } from '@/models/Price';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
 
 interface Props {
@@ -370,7 +370,7 @@ const SubscriptionLineItemTable: FC<Props> = ({ data, onEdit, onTerminate, isLoa
 					const defaultEndDate = '0001-01-01T00:00:00Z';
 					const hasEndDate = !!(row.end_date && row.end_date.trim() !== '' && row.end_date !== defaultEndDate);
 					const isTerminateDisabled = isArchived || hasEndDate;
-					const isEditDisabled = isArchived || hasEndDate || row.price_type !== PRICE_TYPE.USAGE;
+					const isEditDisabled = isArchived || hasEndDate;
 
 					return (
 						<LineItemDropdown
@@ -384,7 +384,7 @@ const SubscriptionLineItemTable: FC<Props> = ({ data, onEdit, onTerminate, isLoa
 				},
 			},
 		],
-		[hasMultipleEntityTypes, commitmentInfo],
+		[hasMultipleEntityTypes, commitmentInfo, handleEditClick, handleTerminateClick],
 	);
 
 	if (isLoading) {
