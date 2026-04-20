@@ -3,7 +3,7 @@ import { Invoice } from '@/models';
 import { generateQueryParams } from '@/utils/common/api_helper';
 import AuthService from '@/core/auth/AuthService';
 import EnvironmentApi from '@/api/EnvironmentApi';
-import { FilterOperator, SortDirection } from '@/types/common/QueryBuilder';
+import { SortDirection } from '@/types/common/QueryBuilder';
 import {
 	GetInvoicesResponse,
 	InvoiceFilter,
