@@ -2,6 +2,7 @@ import { FC, useMemo } from 'react';
 import { Subscription, SUBSCRIPTION_STATUS, SUBSCRIPTION_TYPE } from '@/models/Subscription';
 import { ColumnData, FlexpriceTable } from '@/components/molecules';
 import { Chip, Tooltip } from '@/components/atoms';
+import { isInheritedSubscription } from '@/utils/subscription/isInheritedSubscription';
 import { formatBillingPeriodForDisplay } from '@/utils/common/helper_functions';
 import formatDate from '@/utils/common/format_date';
 import SubscriptionActionButton from './SubscriptionActionButton';
@@ -15,8 +16,8 @@ export interface SubscriptionTableProps {
 }
 
 function subscriptionHierarchyKind(row: Subscription): 'inherited' | 'parent' | null {
+	if (isInheritedSubscription(row)) return 'inherited';
 	const t = row.subscription_type?.toLowerCase();
-	if (t === SUBSCRIPTION_TYPE.INHERITED || Boolean(row.parent_subscription_id?.trim())) return 'inherited';
 	if (t === SUBSCRIPTION_TYPE.PARENT) return 'parent';
 	return null;
 }
@@ -152,11 +153,7 @@ const SubscriptionTable: FC<SubscriptionTableProps> = ({ data, onRowClick, allow
 							width: '30px',
 							fieldVariant: 'interactive' as const,
 							hideOnEmpty: true,
-							render: (row: Subscription) => {
-								// Inherited (child) subscriptions are managed via the parent; hide actions like edit/pause/cancel.
-								if (subscriptionHierarchyKind(row) === 'inherited') return null;
-								return <SubscriptionActionButton subscription={row} />;
-							},
+							render: (row: Subscription) => <SubscriptionActionButton subscription={row} />,
 						},
 					]
 				: []),

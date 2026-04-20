@@ -17,6 +17,8 @@ interface Props {
 	isLoading?: boolean;
 	hideCardWrapper?: boolean;
 	commitmentInfo?: SubscriptionCommitmentInfo;
+	/** When true, edit/terminate actions are disabled (e.g. inherited subscription). */
+	readOnly?: boolean;
 }
 
 interface LineItemWithStatus extends LineItem {
@@ -226,7 +228,15 @@ const formatCommitmentTooltip = (info: SubscriptionCommitmentInfo): React.ReactN
 	return <div className='flex flex-col gap-2'>{rows}</div>;
 };
 
-const SubscriptionLineItemTable: FC<Props> = ({ data, onEdit, onTerminate, isLoading, hideCardWrapper = false, commitmentInfo }) => {
+const SubscriptionLineItemTable: FC<Props> = ({
+	data,
+	onEdit,
+	onTerminate,
+	isLoading,
+	hideCardWrapper = false,
+	commitmentInfo,
+	readOnly = false,
+}) => {
 	const [showTerminateModal, setShowTerminateModal] = useState(false);
 	const [selectedLineItem, setSelectedLineItem] = useState<LineItem | null>(null);
 
@@ -384,8 +394,8 @@ const SubscriptionLineItemTable: FC<Props> = ({ data, onEdit, onTerminate, isLoa
 					const isArchived = row.status === ENTITY_STATUS.ARCHIVED;
 					const defaultEndDate = '0001-01-01T00:00:00Z';
 					const hasEndDate = !!(row.end_date && row.end_date.trim() !== '' && row.end_date !== defaultEndDate);
-					const isTerminateDisabled = isArchived || hasEndDate;
-					const isEditDisabled = isArchived || hasEndDate;
+					const isTerminateDisabled = readOnly || isArchived || hasEndDate;
+					const isEditDisabled = readOnly || isArchived || hasEndDate;
 
 					return (
 						<LineItemDropdown
@@ -399,7 +409,7 @@ const SubscriptionLineItemTable: FC<Props> = ({ data, onEdit, onTerminate, isLoa
 				},
 			},
 		],
-		[hasMultipleEntityTypes, commitmentInfo, handleEditClick, handleTerminateClick],
+		[hasMultipleEntityTypes, commitmentInfo, handleEditClick, handleTerminateClick, readOnly],
 	);
 
 	if (isLoading) {

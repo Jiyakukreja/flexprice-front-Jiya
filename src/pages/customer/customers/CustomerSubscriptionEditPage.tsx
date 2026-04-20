@@ -33,6 +33,7 @@ import { EXPAND } from '@/models';
 import { generateExpandQueryParams } from '@/utils/common/api_helper';
 import { ExtendedPriceOverride } from '@/utils/common/price_override_helpers';
 import { convertPriceOverrideToLineItemUpdate } from '@/utils/subscription/priceOverrideToLineItemUpdate';
+import { isInheritedSubscription } from '@/utils/subscription/isInheritedSubscription';
 import { getPriceTypeFromLineItem, lineItemToPrice } from '@/utils/subscription/lineItemToPrice';
 import { useSubscriptionLineItemsGrouped } from '@/hooks/useSubscriptionLineItemsGrouped';
 import { RouteNames } from '@/core/routes/Routes';
@@ -309,6 +310,8 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 		return null;
 	}
 
+	const subscriptionReadOnly = isInheritedSubscription(subscriptionDetails);
+
 	return (
 		<Page documentTitle='Edit Subscription' heading='Edit Subscription'>
 			<div className='space-y-6'>
@@ -329,6 +332,7 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 						inheritingSubscriptions={inheritedSubscriptionRows}
 						isListLoading={isInheritedSubscriptionsLoading}
 						isAddDisabled={
+							subscriptionReadOnly ||
 							subscriptionDetails.subscription_status === SUBSCRIPTION_STATUS.CANCELLED ||
 							subscriptionDetails.subscription_status === SUBSCRIPTION_STATUS.TRIALING
 						}
@@ -347,6 +351,7 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 						subscriptionDetails?.subscription_status === SUBSCRIPTION_STATUS.CANCELLED ||
 						subscriptionDetails?.subscription_status === SUBSCRIPTION_STATUS.TRIALING
 					}
+					readOnly={subscriptionReadOnly}
 					commitmentInfo={{
 						enable_true_up: subscriptionDetails?.enable_true_up,
 						commitment_amount: subscriptionDetails?.commitment_amount,
@@ -362,6 +367,7 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 						subscriptionDetails?.subscription_status === SUBSCRIPTION_STATUS.CANCELLED ||
 						subscriptionDetails?.subscription_status === SUBSCRIPTION_STATUS.TRIALING
 					}
+					readOnly={subscriptionReadOnly}
 					onAddClick={() => setIsAddCreditGrantModalOpen(true)}
 					onRequestCancel={handleCancelCreditGrant}
 					subscriptionId={subscriptionId!}
@@ -375,9 +381,9 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 					onCloseCancelModal={handleCloseCancelModal}
 				/>
 
-				{subscriptionId && <SubscriptionEntitlementsSection subscriptionId={subscriptionId} />}
+				{subscriptionId && <SubscriptionEntitlementsSection subscriptionId={subscriptionId} readOnly={subscriptionReadOnly} />}
 
-				{subscriptionId && <SubscriptionAddonsSection subscriptionId={subscriptionId} />}
+				{subscriptionId && <SubscriptionAddonsSection subscriptionId={subscriptionId} readOnly={subscriptionReadOnly} />}
 
 				{editingLineItem?.mode === SUBSCRIPTION_LINE_ITEM_EDIT_MODE.USAGE_OVERRIDE && (
 					<PriceOverrideDialog
