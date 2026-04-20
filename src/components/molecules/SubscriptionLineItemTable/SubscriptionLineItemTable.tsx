@@ -7,7 +7,7 @@ import { FC, useState, useCallback, useMemo } from 'react';
 import { Trash2, Pencil, Info } from 'lucide-react';
 import { ENTITY_STATUS } from '@/models/base';
 import { formatBillingPeriodForDisplay, getCurrencySymbol, getPriceTypeLabel } from '@/utils/common/helper_functions';
-import { PRICE_ENTITY_TYPE, PRICE_STATUS } from '@/models/Price';
+import { PRICE_ENTITY_TYPE, PRICE_STATUS, PRICE_TYPE } from '@/models/Price';
 import { formatDateTimeWithSecondsAndTimezone } from '@/utils/common/format_date';
 
 interface Props {
@@ -324,6 +324,10 @@ const SubscriptionLineItemTable: FC<Props> = ({ data, onEdit, onTerminate, isLoa
 			{
 				title: 'Quantity',
 				render: (row) => {
+					if (row.price_type === PRICE_TYPE.USAGE) {
+						return <span className='text-gray-500'>--</span>;
+					}
+
 					const q = row.quantity;
 					if (q == null || !Number.isFinite(Number(q))) return <span className='text-gray-500'>--</span>;
 					const n = Number(q);
