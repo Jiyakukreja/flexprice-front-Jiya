@@ -632,6 +632,7 @@ export interface CreateSubscriptionLineItemRequest {
 	metadata?: Metadata;
 	display_name?: string;
 	subscription_phase_id?: string;
+	proration_behavior?: ADDON_PRORATION_BEHAVIOR;
 	// Commitment fields
 	commitment_amount?: number;
 	commitment_quantity?: number;
@@ -652,6 +653,7 @@ export interface UpdateSubscriptionLineItemRequest {
 	metadata?: Metadata;
 	price_unit_amount?: string;
 	price_unit_tiers?: CreatePriceTier[];
+	proration_behavior?: ADDON_PRORATION_BEHAVIOR;
 	// Commitment fields
 	commitment_amount?: number;
 	commitment_quantity?: number;
@@ -664,6 +666,7 @@ export interface UpdateSubscriptionLineItemRequest {
 
 export interface DeleteSubscriptionLineItemRequest {
 	effective_from?: string;
+	proration_behavior?: ADDON_PRORATION_BEHAVIOR;
 }
 
 export interface SubscriptionLineItemResponse {
@@ -690,6 +693,8 @@ export interface SubscriptionLineItemResponse {
 	metadata: Metadata;
 	created_at: string;
 	updated_at: string;
+	// Addon association link
+	addon_association_id?: string;
 	// Commitment fields
 	commitment_quantity?: string;
 	commitment_type?: string;
