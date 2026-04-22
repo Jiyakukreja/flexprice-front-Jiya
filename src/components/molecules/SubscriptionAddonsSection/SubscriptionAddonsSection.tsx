@@ -1,13 +1,14 @@
 import { FC, useState, useMemo, useCallback, ReactNode } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
-import { Button, Card, CardHeader, Chip, Dialog, AddButton, Tooltip, NoDataCard } from '@/components/atoms';
+import { Button, Card, CardHeader, Chip, DatePicker, Dialog, AddButton, Select, Tooltip, NoDataCard } from '@/components/atoms';
 import { FlexpriceTable, ColumnData } from '@/components/molecules';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import SubscriptionApi from '@/api/SubscriptionApi';
 import { ADDON_ASSOCIATION_STATUS } from '@/models/AddonAssociation';
 import { AddonAssociationResponse } from '@/types/dto/Subscription';
+import { ADDON_PRORATION_BEHAVIOR } from '@/types/dto/Addon';
 import { toSentenceCase } from '@/utils/common/helper_functions';
 import { Price, PRICE_TYPE } from '@/models/Price';
 import { getCurrentPriceAmount } from '@/utils/common/price_override_helpers';
@@ -131,8 +132,10 @@ const computeAssociationStatus = (association: AddonAssociationResponse): AddonS
 
 const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({ subscriptionId, readOnly = false }) => {
 	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-	const [addonToDelete, setAddonToDelete] = useState<AddonAssociationResponse | null>(null);
+	const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+	const [addonToCancel, setAddonToCancel] = useState<AddonAssociationResponse | null>(null);
+	const [effectiveEndDate, setEffectiveEndDate] = useState<Date | undefined>(undefined);
+	const [cancelProrationBehavior, setCancelProrationBehavior] = useState<ADDON_PRORATION_BEHAVIOR | ''>('');
 	const [dropdownOpen, setDropdownOpen] = useState<string | null>(null);
 	const queryClient = useQueryClient();
 
@@ -185,44 +188,63 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({ subscri
 		});
 	}, [addonAssociations]);
 
-	const addonNameToDelete = useMemo(() => {
-		if (!addonToDelete) return 'this addon';
-		return addonAssociations.find((a) => a.id === addonToDelete.id)?.addon?.name || 'this addon';
-	}, [addonToDelete, addonAssociations]);
+	const addonNameToCancel = useMemo(() => {
+		if (!addonToCancel) return 'this addon';
+		return addonAssociations.find((a) => a.id === addonToCancel.id)?.addon?.name || 'this addon';
+	}, [addonToCancel, addonAssociations]);
 
-	// Delete addon mutation
-	const { mutate: deleteAddon, isPending: isDeletingAddon } = useMutation({
-		mutationFn: async (addonAssociationId: string) => {
+	// Cancel addon mutation
+	const { mutate: cancelAddon, isPending: isCancellingAddon } = useMutation({
+		mutationFn: async (payload: { addonAssociationId: string; effectiveDate?: string; prorationBehavior?: ADDON_PRORATION_BEHAVIOR }) => {
 			return await SubscriptionApi.removeAddonFromSubscription({
-				addon_association_id: addonAssociationId,
+				addon_association_id: payload.addonAssociationId,
+				...(payload.effectiveDate ? { effective_date: payload.effectiveDate } : {}),
+				...(payload.prorationBehavior ? { proration_behavior: payload.prorationBehavior } : {}),
 			});
 		},
 		onSuccess: () => {
-			toast.success('Addon removed successfully');
+			toast.success('Addon cancelled successfully');
 			queryClient.invalidateQueries({ queryKey: ['subscriptionActiveAddons', subscriptionId] });
 			queryClient.invalidateQueries({ queryKey: ['subscriptionDetails', subscriptionId] });
-			setIsDeleteDialogOpen(false);
-			setAddonToDelete(null);
+			setIsCancelDialogOpen(false);
+			setAddonToCancel(null);
+			setEffectiveEndDate(undefined);
+			setCancelProrationBehavior('');
 		},
-		onError: (error: any) => {
-			toast.error(error?.error?.message || 'Failed to remove addon');
+		onError: (error: unknown) => {
+			const message =
+				typeof error === 'object' && error && 'error' in error ? (error as { error?: { message?: string } }).error?.message : undefined;
+			toast.error(message || 'Failed to cancel addon');
 		},
 	});
 
-	const handleDelete = useCallback((addon: AddonAssociationResponse) => {
-		setDropdownOpen(null);
-		setAddonToDelete(addon);
-		setIsDeleteDialogOpen(true);
-	}, []);
+	const handleCancel = useCallback(
+		(addon: AddonAssociationResponse) => {
+			setDropdownOpen(null);
+			setAddonToCancel(addon);
+			const rawPeriodEnd = subscriptionDetails?.current_period_end;
+			const periodEnd = rawPeriodEnd ? new Date(rawPeriodEnd) : undefined;
+			setEffectiveEndDate(periodEnd && !isNaN(periodEnd.getTime()) ? periodEnd : undefined);
+			setCancelProrationBehavior(ADDON_PRORATION_BEHAVIOR.NONE);
+			setIsCancelDialogOpen(true);
+		},
+		[subscriptionDetails?.current_period_end],
+	);
 
-	const confirmDelete = useCallback(() => {
-		if (!addonToDelete) return;
-		deleteAddon(addonToDelete.id);
-	}, [addonToDelete, deleteAddon]);
+	const confirmCancel = useCallback(() => {
+		if (!addonToCancel) return;
+		cancelAddon({
+			addonAssociationId: addonToCancel.id,
+			effectiveDate: effectiveEndDate?.toISOString(),
+			prorationBehavior: cancelProrationBehavior || undefined,
+		});
+	}, [addonToCancel, cancelAddon, effectiveEndDate, cancelProrationBehavior]);
 
-	const cancelDelete = useCallback(() => {
-		setIsDeleteDialogOpen(false);
-		setAddonToDelete(null);
+	const closeCancelDialog = useCallback(() => {
+		setIsCancelDialogOpen(false);
+		setAddonToCancel(null);
+		setEffectiveEndDate(undefined);
+		setCancelProrationBehavior('');
 	}, []);
 
 	const columns: ColumnData<AddonAssociationWithStatus>[] = useMemo(
@@ -259,6 +281,7 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({ subscri
 				hideOnEmpty: true,
 				render: (row) => {
 					if (readOnly) return null;
+					const hasEndDate = !!row.end_date && row.end_date.trim() !== '';
 					return (
 						<div
 							data-interactive='true'
@@ -274,13 +297,15 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({ subscri
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align='end'>
 									<DropdownMenuItem
+										disabled={hasEndDate}
 										onSelect={(e) => {
+											if (hasEndDate) return;
 											e.preventDefault();
-											handleDelete(row);
+											handleCancel(row);
 										}}
-										className='flex gap-2 items-center cursor-pointer text-red-600'>
+										className={`flex gap-2 items-center cursor-pointer text-red-600 ${hasEndDate ? 'opacity-50 cursor-not-allowed' : ''}`}>
 										<Trash2 className='h-4 w-4' />
-										<span>Delete</span>
+										<span>Cancel</span>
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>
@@ -289,7 +314,7 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({ subscri
 				},
 			},
 		],
-		[dropdownOpen, handleDelete, readOnly],
+		[dropdownOpen, handleCancel, readOnly],
 	);
 
 	if (isLoading) {
@@ -331,21 +356,54 @@ const SubscriptionAddonsSection: FC<SubscriptionAddonsSectionProps> = ({ subscri
 				currency={subscriptionDetails?.currency}
 			/>
 
-			{/* Delete Confirmation Dialog */}
+			{/* Cancel Addon Dialog */}
 			<Dialog
-				title={`Are you sure you want to delete the addon "${addonNameToDelete}"?`}
-				description='This action cannot be undone.'
+				title={`Cancel addon "${addonNameToCancel}"?`}
+				description='Optionally schedule an effective end date and choose proration behavior.'
 				titleClassName='text-lg font-normal text-gray-800'
-				isOpen={isDeleteDialogOpen}
-				onOpenChange={setIsDeleteDialogOpen}
+				isOpen={isCancelDialogOpen}
+				onOpenChange={(open) => {
+					setIsCancelDialogOpen(open);
+					if (!open) {
+						closeCancelDialog();
+					}
+				}}
 				showCloseButton={false}>
-				<div className='flex flex-col gap-4 items-end justify-center'>
-					<div className='flex gap-4'>
-						<Button variant='outline' onClick={cancelDelete} disabled={isDeletingAddon}>
-							Cancel
+				<div className='space-y-5'>
+					<div className='rounded-xl border border-gray-200 p-4 space-y-3'>
+						<div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+							<DatePicker
+								label='Effective end date (optional)'
+								placeholder='End date'
+								date={effectiveEndDate}
+								setDate={setEffectiveEndDate}
+								className='w-full'
+								popoverTriggerClassName='w-full'
+							/>
+							<Select
+								label='Proration (optional)'
+								placeholder='Default'
+								options={[
+									{
+										label: 'Prorate',
+										value: ADDON_PRORATION_BEHAVIOR.CREATE_PRORATIONS,
+										description: 'Creates proration credits/charges.',
+									},
+									{ label: 'No proration', value: ADDON_PRORATION_BEHAVIOR.NONE, description: 'No proration adjustments.' },
+								]}
+								value={cancelProrationBehavior}
+								onChange={(v) => setCancelProrationBehavior(v as ADDON_PRORATION_BEHAVIOR)}
+							/>
+						</div>
+						<p className='text-xs text-gray-500'>Leave empty to cancel immediately. Pick a future date to schedule cancellation.</p>
+					</div>
+
+					<div className='flex justify-end gap-3'>
+						<Button variant='outline' onClick={closeCancelDialog} disabled={isCancellingAddon}>
+							Keep addon
 						</Button>
-						<Button variant='destructive' onClick={confirmDelete} disabled={isDeletingAddon}>
-							{isDeletingAddon ? 'Deleting...' : 'Delete'}
+						<Button variant='destructive' onClick={confirmCancel} disabled={isCancellingAddon}>
+							{isCancellingAddon ? 'Cancelling...' : 'Cancel addon'}
 						</Button>
 					</div>
 				</div>
