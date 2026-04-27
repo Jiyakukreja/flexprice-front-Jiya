@@ -6,6 +6,7 @@ import { ScheduledTask, SCHEDULED_ENTITY_TYPE, SCHEDULED_TASK_INTERVAL } from '@
 import { CreateScheduledTaskPayload } from '@/types/dto';
 import toast from 'react-hot-toast';
 import { ChevronDown, ChevronRight, Info } from 'lucide-react';
+import { getApiErrorMessage } from '@/core/axios/types';
 
 interface ExportDrawerProps {
 	isOpen: boolean;
@@ -121,22 +122,7 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 
 		try {
 			const v = JSON.parse(raw);
-			if (!Array.isArray(v)) return { ok: false as const, error: 'Must be a JSON array of objects' };
-			for (const item of v) {
-				if (!item || typeof item !== 'object') return { ok: false as const, error: 'Each item must be an object' };
-				if (!('entity_type' in item) || !('field_key' in item)) {
-					return { ok: false as const, error: 'Each item must include "entity_type" and "field_key"' };
-				}
-				if (item.entity_type !== 'customer' && item.entity_type !== 'wallet') {
-					return { ok: false as const, error: '"entity_type" must be "customer" or "wallet"' };
-				}
-				if (typeof item.field_key !== 'string' || !item.field_key.trim()) {
-					return { ok: false as const, error: '"field_key" must be a non-empty string' };
-				}
-				if ('column_name' in item && item.column_name != null && typeof item.column_name !== 'string') {
-					return { ok: false as const, error: '"column_name" must be a string when provided' };
-				}
-			}
+			if (!Array.isArray(v)) return { ok: false as const, error: 'Must be a JSON array' };
 			return { ok: true as const, value: v };
 		} catch {
 			return { ok: false as const, error: 'Invalid JSON' };
@@ -213,7 +199,14 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 			onOpenChange(false);
 		},
 		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to create export task');
+			const apiMessage = getApiErrorMessage(error?.response?.data ?? error, 'Failed to create export task');
+			toast.error(apiMessage);
+
+			const code = error?.response?.data?.code;
+			if (code === 'validation_error' && typeof apiMessage === 'string' && apiMessage.toLowerCase().includes('export metadata field')) {
+				setErrors((prev) => ({ ...prev, export_metadata_fields_json: apiMessage }));
+				setIsMetadataExpanded(true);
+			}
 		},
 	});
 
@@ -261,7 +254,14 @@ const ExportDrawer: FC<ExportDrawerProps> = ({ isOpen, onOpenChange, connectionI
 			onOpenChange(false);
 		},
 		onError: (error: any) => {
-			toast.error(error?.message || 'Failed to update export task');
+			const apiMessage = getApiErrorMessage(error?.response?.data ?? error, 'Failed to update export task');
+			toast.error(apiMessage);
+
+			const code = error?.response?.data?.code;
+			if (code === 'validation_error' && typeof apiMessage === 'string' && apiMessage.toLowerCase().includes('export metadata field')) {
+				setErrors((prev) => ({ ...prev, export_metadata_fields_json: apiMessage }));
+				setIsMetadataExpanded(true);
+			}
 		},
 	});
 
