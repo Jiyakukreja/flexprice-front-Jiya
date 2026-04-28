@@ -5,11 +5,6 @@ import {
 	ListSubscriptionsResponse,
 	GetSubscriptionDetailsPayload,
 	GetSubscriptionPreviewResponse,
-	// Pause/Resume subscription support (backend routes removed)
-	// PauseSubscriptionPayload,
-	// ResumeSubscriptionPayload,
-	// SubscriptionPauseResponse,
-	// SubscriptionResumeResponse,
 	CancelSubscriptionPayload,
 	CreateSubscriptionRequest,
 	UpdateSubscriptionRequest,
@@ -26,8 +21,6 @@ import {
 	UpdateSubscriptionLineItemRequest,
 	DeleteSubscriptionLineItemRequest,
 	SubscriptionLineItemResponse,
-	// Pause history support (backend routes removed)
-	// ListSubscriptionPausesResponse,
 	PreviewSubscriptionChangeRequest,
 	PreviewSubscriptionChangeResponse,
 	ExecuteSubscriptionChangeRequest,
@@ -110,25 +103,6 @@ class SubscriptionApi {
 	// =============================================================================
 	// SUBSCRIPTION STATUS METHODS
 	// =============================================================================
-	//
-	// Pause/Resume support disabled:
-	// Backend routes removed:
-	// - POST /subscriptions/:id/pause
-	// - POST /subscriptions/:id/resume
-	//
-	// /**
-	//  * Pause subscription
-	//  */
-	// public static async pauseSubscription(id: string, payload: PauseSubscriptionPayload): Promise<SubscriptionPauseResponse> {
-	// 	return await AxiosClient.post(`${this.baseUrl}/${id}/pause`, payload);
-	// }
-	//
-	// /**
-	//  * Resume subscription
-	//  */
-	// public static async resumeSubscription(id: string, payload: ResumeSubscriptionPayload): Promise<SubscriptionResumeResponse> {
-	// 	return await AxiosClient.post(`${this.baseUrl}/${id}/resume`, payload);
-	// }
 
 	/**
 	 * Activate draft subscription
@@ -245,20 +219,6 @@ class SubscriptionApi {
 	public static async getUpcomingCreditGrantApplications(subscriptionId: string): Promise<ListCreditGrantApplicationsResponse> {
 		return await AxiosClient.get<ListCreditGrantApplicationsResponse>(`${this.baseUrl}/${subscriptionId}/grants/upcoming`);
 	}
-
-	// =============================================================================
-	// SUBSCRIPTION PAUSE METHODS (disabled)
-	// =============================================================================
-	//
-	// Backend route removed:
-	// - GET /subscriptions/:id/pauses
-	//
-	// /**
-	//  * List all pauses for a subscription
-	//  */
-	// public static async listPauses(subscriptionId: string): Promise<ListSubscriptionPausesResponse> {
-	// 	return await AxiosClient.get<ListSubscriptionPausesResponse>(`${this.baseUrl}/${subscriptionId}/pauses`);
-	// }
 
 	// =============================================================================
 	// SUBSCRIPTION CHANGE METHODS

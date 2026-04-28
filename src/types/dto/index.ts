@@ -149,11 +149,6 @@ export type { GetAllSecretKeysResponse, CreateSecretKeyPayload, CreateSecretKeyR
 export type {
 	GetSubscriptionDetailsPayload,
 	GetSubscriptionPreviewResponse,
-	// Pause/Resume subscription support (backend routes removed; intentionally commented out)
-	// PauseSubscriptionPayload,
-	// ResumeSubscriptionPayload,
-	// SubscriptionPauseResponse,
-	// SubscriptionResumeResponse,
 	CreateSubscriptionRequest,
 	SubscriptionInheritanceConfig,
 	UpdateSubscriptionRequest,
