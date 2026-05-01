@@ -38,7 +38,7 @@ import { isInheritedSubscription } from '@/utils/subscription/isInheritedSubscri
 import { getPriceTypeFromLineItem, lineItemToPrice } from '@/utils/subscription/lineItemToPrice';
 import { RouteNames } from '@/core/routes/Routes';
 import { refetchQueries } from '@/core/services/tanstack/ReactQueryProvider';
-import { ENTITY_STATUS, CreditGrant } from '@/models';
+import { ENTITY_STATUS, CreditGrant, CREDIT_GRANT_SCOPE } from '@/models';
 import { useSubscriptionEditCoreQuery } from '@/hooks/useSubscriptionEditCoreQuery';
 import { subscriptionEditInheritedQueryKey, subscriptionEditScopeQueryKey } from '@/utils/subscription/subscriptionEditQueryKeys';
 import type { CreateCreditGrantRequest } from '@/types/dto/CreditGrant';
@@ -99,6 +99,7 @@ const CustomerSubscriptionEditPage: React.FC = () => {
 			return await CreditGrantApi.list({
 				subscription_ids: [subscriptionId!],
 				status: ENTITY_STATUS.PUBLISHED,
+				scope: CREDIT_GRANT_SCOPE.SUBSCRIPTION,
 			});
 		},
 		enabled:

@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import SubscriptionApi from '@/api/SubscriptionApi';
 import { EXPAND } from '@/models';
 import usePagination, { PAGINATION_PREFIX } from '@/hooks/usePagination';
-import useFilterSortingWithPersistence from '@/hooks/useFilterSortingWithPersistence';
+import useFilterSorting from '@/hooks/useFilterSorting';
 import { usePaginationReset } from '@/hooks/usePaginationReset';
 import { subscriptionEditLineItemsQueryKey } from '@/utils/subscription/subscriptionEditQueryKeys';
 import { subscriptionLineItemListItemToLineItem } from '@/utils/subscription/subscriptionLineItemListItemToLineItem';
@@ -49,8 +49,7 @@ const SubscriptionEditChargesSection: FC<SubscriptionEditChargesSectionProps> = 
 	readOnly = false,
 	commitmentInfo,
 }) => {
-	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSortingWithPersistence({
-		persistenceKey: 'subscriptionEditCharges',
+	const { filters, sorts, setFilters, setSorts, sanitizedFilters, sanitizedSorts } = useFilterSorting({
 		debounceTime: 300,
 	});
 
