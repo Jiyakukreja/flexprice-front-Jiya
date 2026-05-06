@@ -4,6 +4,7 @@ import WebhookApi from '@/api/WebhookApi';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { AppPortal } from 'svix-react';
+import 'svix-react/style.css';
 import { EmptyPage } from '@/components/organisms';
 import { useMemo } from 'react';
 import useEnvironment from '@/hooks/useEnvironment';
