@@ -34,22 +34,33 @@ Because of that, this implementation intentionally prioritizes:
 
 # Brand Direction
 
-One of the interesting observations while exploring FlexPrice was how strongly the product communicates “infrastructure-grade reliability”.
+While exploring the FlexPrice platform and design language, one of the strongest observations was how clearly the product communicates:
 
-To align with that feeling, I intentionally designed the system around:
+- infrastructure reliability
+- realtime operations
+- AI-native workflows
+- modern developer tooling
 
-- Deep operational blues
-- Soft electric gradients
-- High-contrast data surfaces
-- Realtime activity patterns
-- AI-native dashboard aesthetics
+To align with that ecosystem feeling, I intentionally designed the frontend system around:
+
+- deep operational blues
+- electric blue gradients
+- soft dark grays
+- glassmorphism surfaces
+- realtime activity patterns
+- high-density infrastructure layouts
 
 Primary palette:
 
-- `#355872`
-- `#7AAACE`
+```css
+--fp-primary: #355872;
+--fp-accent: #7AAACE;
+```
 
-This helped the assignment feel visually aligned with the existing FlexPrice ecosystem while still being implemented independently.
+This acted as a subtle psychological alignment layer so the assignment feels visually closer to something that could naturally evolve inside the existing FlexPrice codebase while still being implemented independently.
+
+Reference:
+https://flexprice.io/
 
 ---
 
@@ -70,7 +81,7 @@ This helped the assignment feel visually aligned with the existing FlexPrice eco
 
 The assignment timeline emphasized shipping quality within limited time.
 
-I intentionally optimized for:
+Because of that, I intentionally optimized for:
 
 - Fast iteration speed
 - Component reusability
@@ -78,13 +89,13 @@ I intentionally optimized for:
 - Design consistency
 - Scalable architecture
 
-rather than overengineering abstractions prematurely.
+rather than prematurely overengineering abstractions.
 
 For example:
 
-I chose TailwindCSS over Styled Components because while Styled Components provides stronger style encapsulation, Tailwind allowed me to move significantly faster while maintaining visual consistency across 15+ reusable components.
+I chose TailwindCSS over Styled Components because while Styled Components provides stronger style encapsulation, Tailwind allowed me to move significantly faster while maintaining consistency across 15+ reusable components.
 
-This matched the implementation velocity expected in the assignment.
+This trade-off matched the implementation velocity expected in the assignment while still maintaining a scalable structure.
 
 ---
 
@@ -107,6 +118,8 @@ This matched the implementation velocity expected in the assignment.
 - MetricCard
 - InvoiceStatusBadge
 - DataTable
+- MeterProgress
+- UsageBar
 
 ---
 
@@ -116,6 +129,7 @@ This matched the implementation velocity expected in the assignment.
 - EmptyState
 - BillingOperationsPanel
 - DeveloperEventLog
+- PricingTierTable
 
 ---
 
@@ -127,42 +141,53 @@ Implemented virtualization using:
 
 ```ts
 @tanstack/react-virtual
+```
 
-This allows efficient rendering for very large datasets without impacting scroll performance.
+This allows efficient rendering for large datasets without impacting UI responsiveness.
 
-Why this matters
+### Why this matters
 
-Most assignments stop at visual implementation.
+Most frontend assignments stop at visual implementation.
 
 I wanted to also demonstrate:
 
-frontend performance awareness
-scalable rendering patterns
-infrastructure-oriented engineering decisions
-2. Realtime Developer Event Stream
+- frontend performance awareness
+- scalable rendering patterns
+- infrastructure-oriented engineering decisions
+
+---
+
+## 2. Realtime Developer Event Stream
 
 Built a dynamic infrastructure-style event stream inspired by operational monitoring systems.
 
 Features include:
 
-dynamic realtime updates
-animated activity feeds
-operational metrics
-infrastructure-oriented UI patterns
-responsive dashboard layouts
-3. Storybook-Driven Development
+- realtime updates
+- animated activity feeds
+- operational metrics
+- infrastructure-oriented UI patterns
+- responsive dashboard layouts
+
+---
+
+## 3. Storybook-Driven Development
 
 All components were built and documented in isolation using Storybook.
 
 This improves:
 
-scalability
-maintainability
-visual consistency
-component discoverability
-developer onboarding
-Trade-offs & Engineering Decisions
-TailwindCSS vs Styled Components
+- scalability
+- maintainability
+- visual consistency
+- component discoverability
+- developer onboarding
+
+---
+
+# Trade-offs & Engineering Decisions
+
+## TailwindCSS vs Styled Components
 
 Styled Components offers stronger component-level style encapsulation.
 
@@ -170,157 +195,214 @@ However:
 
 TailwindCSS allowed:
 
-faster iteration
-easier responsive design
-lower styling overhead
-better consistency during rapid implementation
+- faster iteration
+- easier responsive design
+- lower styling overhead
+- better consistency during rapid implementation
 
-Given the assignment timeline, this trade-off optimized for shipping velocity while still maintaining clean structure.
+While Styled Components is more robust in certain large-scale styling scenarios, Tailwind helped ship the required frontend system significantly faster without compromising maintainability.
 
-Storybook-first vs Page-first Development
+This matched the assignment timeline expectations more effectively.
 
-Building directly inside application pages is often initially faster.
+---
+
+## Storybook-first vs Page-first Development
+
+Building directly inside pages is initially faster.
 
 However:
 
 Storybook-first development:
 
-encourages reusable APIs
-improves component isolation
-simplifies testing
-scales better for design systems
+- encourages reusable APIs
+- improves component isolation
+- simplifies testing
+- scales better for design systems
 
 Since FlexPrice emphasizes frontend ownership and scalable UI systems, Storybook-first architecture aligned better with that engineering culture.
 
-Why Glassmorphism?
+---
+
+## Why Glassmorphism?
 
 Many billing dashboards feel visually dense and outdated.
 
 I intentionally used:
 
-layered transparency
-soft gradients
-depth shadows
-glassmorphism surfaces
+- layered transparency
+- soft gradients
+- depth shadows
+- glassmorphism surfaces
 
 to create:
 
-cleaner visual hierarchy
-lighter operational workflows
-modern SaaS aesthetics
-better infrastructure-tool feel
+- cleaner visual hierarchy
+- lighter operational workflows
+- modern SaaS aesthetics
+- better infrastructure-tool feel
 
-while still maintaining readability.
+while still maintaining readability and information density.
 
-If I Had More Time
+---
+
+# If I Had More Time
 
 There are several advanced systems I would continue building.
 
-1. Webhook Activity Monitoring
+---
+
+## 1. Webhook Activity Monitoring
 
 A realtime operational timeline showing:
 
-webhook retries
-delivery latency
-failed sync events
-retry queues
-API health monitoring
+- webhook retries
+- delivery latency
+- failed sync events
+- retry queues
+- API health monitoring
 
 similar to Stripe-style infrastructure tooling.
 
-2. Finance Team Export System
+---
+
+## 2. Finance Team Export System
 
 Advanced financial tooling including:
 
-CSV exports
-invoice batch actions
-scheduled reporting
-accounting integrations
-custom financial summaries
-3. Global Query State Management
+- CSV exports
+- invoice batch actions
+- scheduled reporting
+- accounting integrations
+- custom financial summaries
+
+---
+
+## 3. Global Query State Management
 
 A centralized filter/query state layer using Zustand.
 
 Features would include:
 
-persisted filters
-route-aware filter restoration
-URL fingerprint syncing
-advanced sorting pipelines
-dashboard-level query synchronization
+- persisted filters
+- route-aware filter restoration
+- URL fingerprint syncing
+- advanced sorting pipelines
+- dashboard-level query synchronization
 
 This would significantly improve scalability for larger operational dashboards.
 
-Performance Considerations
+---
+
+# Performance Considerations
 
 Optimizations implemented:
 
-Virtualized rendering
-Memoized sorting
-Lightweight animation usage
-Reduced unnecessary rerenders
-Efficient component structure
-Faster Storybook rendering
-Storybook
+- Virtualized rendering
+- Memoized sorting
+- Lightweight animation usage
+- Reduced unnecessary rerenders
+- Efficient component structure
+- Faster Storybook rendering
 
-Run Storybook:
+---
 
+# Storybook
+
+Run Storybook locally:
+
+```bash
 npm run storybook
+```
 
 Build Storybook:
 
+```bash
 npm run build-storybook
-Development
+```
+
+---
+
+# Development
 
 Install dependencies:
 
+```bash
 npm install
+```
 
 Run development server:
 
+```bash
 npm run dev
+```
 
 Build production:
 
+```bash
 npm run build
-Evaluation Alignment
+```
+
+---
+
+# Deployment
+
+The final deliverable is deployed as a Storybook build on Vercel.
+
+Deployment includes:
+
+- interactive component previews
+- responsive UI rendering
+- isolated design system documentation
+- reusable frontend architecture
+- production-ready component structure
+
+---
+
+# Evaluation Alignment
 
 The implementation was built while keeping the assignment evaluation criteria in mind.
 
-Area	Focus
-Component coverage & fidelity	Infrastructure-inspired reusable design system
-Storybook quality	Isolated stories, scalable documentation and controls
-Code quality	TypeScript-first architecture and reusable APIs
-Advanced challenges	Virtualization and realtime infrastructure patterns
-Tests	Interaction-focused component architecture
-Deployment & hygiene	Production build verification and clean structure
-Project Philosophy
+| Area | Focus |
+|---|---|
+| Component coverage & fidelity | Infrastructure-inspired reusable design system |
+| Storybook quality | Isolated stories, scalable documentation and controls |
+| Code quality | TypeScript-first architecture and reusable APIs |
+| Advanced challenges | Virtualization and realtime infrastructure patterns |
+| Tests | Interaction-focused component architecture |
+| Deployment & hygiene | Production build verification and clean structure |
+
+---
+
+# Project Philosophy
 
 The assignment specifically mentioned:
 
-“15 well-done components beat 30 half-baked ones.”
+> “15 well-done components beat 30 half-baked ones.”
 
 That became the guiding principle for this implementation.
 
 Instead of maximizing component count, I focused on:
 
-frontend system quality
-operational UX consistency
-scalable architecture
-reusable design primitives
-polished interactions
-production-oriented thinking
-Final Notes
+- frontend system quality
+- operational UX consistency
+- scalable architecture
+- reusable design primitives
+- polished interactions
+- production-oriented thinking
+
+---
+
+# Final Notes
 
 This implementation was built from scratch using the visible FlexPrice product patterns only as inspiration.
 
 The focus throughout the project was:
 
-architectural judgment
-scalable frontend engineering
-realtime operational UX
-performance-aware rendering
-reusable system design
+- architectural judgment
+- scalable frontend engineering
+- realtime operational UX
+- performance-aware rendering
+- reusable system design
 
 rather than pixel-perfect cloning.
 
