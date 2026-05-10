@@ -85,7 +85,6 @@ export const Button: React.FC<ButtonProps> = ({
   </button>
 );
 ```
-
 ### 2. Molecules
 
 Combinations of atoms:

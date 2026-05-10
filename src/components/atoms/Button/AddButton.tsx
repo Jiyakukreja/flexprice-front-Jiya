@@ -1,5 +1,5 @@
 import { Plus } from 'lucide-react';
-import Button, { ButtonProps } from './Button';
+import { Button, type ButtonProps } from './Button';
 import { cn } from '@/lib/utils';
 
 interface AddButtonProps extends Omit<ButtonProps, 'prefixIcon'> {

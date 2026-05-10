@@ -27,7 +27,6 @@ export const formatAmount = (amount: string, options: NumberFormatOptions = DEFA
 		...options,
 	};
 
-	// Handle negative numbers
 	const isNegative = allowNegative && amount.startsWith('-');
 	const absAmount = isNegative ? amount.slice(1) : amount;
 
@@ -35,11 +34,10 @@ export const formatAmount = (amount: string, options: NumberFormatOptions = DEFA
 	const integerPart = parts[0] || '';
 	const decimalPart = parts[1];
 
-	// Format integer part with separators
 	const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, thousandSeparator);
 
-	// Combine parts
 	let result = formattedInteger;
+
 	if (allowDecimals && decimalPart !== undefined) {
 		result += decimalSeparator + decimalPart;
 	}
@@ -48,28 +46,38 @@ export const formatAmount = (amount: string, options: NumberFormatOptions = DEFA
 };
 
 export const removeFormatting = (amount: string, options: NumberFormatOptions = DEFAULT_FORMAT_OPTIONS): string => {
-	const { thousandSeparator } = { ...DEFAULT_FORMAT_OPTIONS, ...options };
+	const { thousandSeparator } = {
+		...DEFAULT_FORMAT_OPTIONS,
+		...options,
+	};
+
 	const escapedSeparator = thousandSeparator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 	return amount.replace(new RegExp(escapedSeparator, 'g'), '');
 };
 
 const getInputPattern = (variant: InputVariant, options: NumberFormatOptions = DEFAULT_FORMAT_OPTIONS): RegExp => {
-	const { allowNegative, allowDecimals, decimalSeparator } = { ...DEFAULT_FORMAT_OPTIONS, ...options };
+	const { allowNegative, allowDecimals, decimalSeparator } = {
+		...DEFAULT_FORMAT_OPTIONS,
+		...options,
+	};
 
 	switch (variant) {
 		case 'integer':
 			return allowNegative ? /^-?\d*$/ : /^\d*$/;
+
 		case 'number':
 		case 'formatted-number':
 			return allowNegative
 				? new RegExp(`^-?\\d*${allowDecimals ? `\\${decimalSeparator}?\\d*` : ''}$`)
 				: new RegExp(`^\\d*${allowDecimals ? `\\${decimalSeparator}?\\d*` : ''}$`);
+
 		default:
 			return /.*/;
 	}
 };
 
-interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
+export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'size'> {
 	label?: string;
 	description?: React.ReactNode;
 	error?: string;
@@ -85,6 +93,7 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, '
 	variant?: InputVariant;
 	formatOptions?: NumberFormatOptions;
 	size?: SizeVariant;
+	fullWidth?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -106,46 +115,50 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 			variant = 'text',
 			size = 'default',
 			formatOptions = DEFAULT_FORMAT_OPTIONS,
+			fullWidth = false,
 			...props
 		},
 		ref,
 	) => {
 		const inputRef = React.useRef<HTMLInputElement | null>(null);
+
 		const [cursorPosition, setCursorPosition] = React.useState<number | null>(null);
 
 		const isFormattedVariant = variant === 'formatted-number' || variant === 'integer';
+
 		const pattern = React.useMemo(() => getInputPattern(variant, formatOptions), [variant, formatOptions]);
 
-		// Handle cursor position after formatting
 		React.useEffect(() => {
 			if (cursorPosition !== null && inputRef.current) {
 				inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+
 				setCursorPosition(null);
 			}
 		}, [cursorPosition]);
 
 		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			let newValue = e.target.value;
+
 			const oldValue = (value as string) || '';
+
 			const currentCursorPosition = e.target.selectionStart || 0;
 
-			// For number variants, validate and format
 			if (variant !== 'text') {
-				// Remove formatting before validation
 				if (isFormattedVariant) {
 					newValue = removeFormatting(newValue, formatOptions);
 				}
 
-				// Validate against pattern
 				if (!pattern.test(newValue)) {
 					return;
 				}
 
-				// Handle cursor position for formatted variants
 				if (isFormattedVariant) {
 					const oldFormatCharCount = (oldValue.slice(0, currentCursorPosition).match(/,/g) || []).length;
+
 					const newFormatCharCount = (formatAmount(newValue, formatOptions).slice(0, currentCursorPosition).match(/,/g) || []).length;
+
 					const cursorAdjustment = newFormatCharCount - oldFormatCharCount;
+
 					setCursorPosition(currentCursorPosition + cursorAdjustment);
 				}
 			}
@@ -162,28 +175,32 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 					allowDecimals: variant !== 'integer',
 				});
 			}
+
 			return value;
 		};
 
+		const inputProps = { ...props };
+
 		return (
 			<div className='space-y-1 w-full flex flex-col'>
-				{/* Label */}
 				{label && <Label label={label} disabled={disabled} labelClassName={labelClassName} htmlFor={id} />}
-				{/* Input */}
+
 				<div
 					className={cn(
 						sizes[size].height,
 						sizes[size].padding,
 						sizes[size].text,
 						sizes[size].display,
-						'w-full flex h-full group items-center rounded-[6px] border bg-background ring-offset-background placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed',
+						fullWidth ? 'w-full' : '',
+						'flex h-full group items-center rounded-[6px] border bg-background ring-offset-background placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed',
 						error ? 'border-destructive' : 'border-input focus-within:ring-ring focus-within:ring-offset-2',
 						'focus-within:border-black',
 						className,
 					)}>
 					{inputPrefix && <div className='mr-2'>{inputPrefix}</div>}
+
 					<input
-						{...props}
+						{...inputProps}
 						id={id}
 						type={type}
 						value={getValue()}
@@ -197,6 +214,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 						onChange={handleChange}
 						ref={(element) => {
 							inputRef.current = element;
+
 							if (typeof ref === 'function') {
 								ref(element);
 							} else if (ref) {
@@ -204,15 +222,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 							}
 						}}
 					/>
+
 					{suffix && (
 						<div className='ml-2 flex shrink-0 items-center self-stretch pl-2 text-sm tabular-nums leading-none text-muted-foreground'>
 							{suffix}
 						</div>
 					)}
 				</div>
-				{/* Description */}
+
 				{description && <p className={cn('text-sm', disabled ? 'text-zinc-500' : 'text-muted-foreground')}>{description}</p>}
-				{/* Error Message */}
+
 				{error && <p className='text-sm text-destructive'>{error}</p>}
 			</div>
 		);

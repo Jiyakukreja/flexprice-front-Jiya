@@ -28,7 +28,7 @@ export type { ColumnData, FlexpriceTableProps, FilterState } from './Table';
 export { default as CustomerUsageChart } from './CustomerUsageChart';
 export { default as CustomerCostChart } from './CustomerCostChart';
 export { default as EventsMonitoringChart } from './EventsMonitoringChart';
-export { default as MetricCard } from './MetricCard';
+export { MetricCard } from './MetricCard/MetricCard';
 export { CostDataTable } from './CostDataTable';
 
 // Dashboard Components

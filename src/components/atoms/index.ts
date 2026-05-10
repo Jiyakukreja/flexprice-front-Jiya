@@ -1,18 +1,27 @@
 export { Button, AddButton } from './Button';
+
 export { default as Input } from './Input';
+
 export { default as SectionHeader } from './SectionHeader';
+
 export { default as Chip } from './Chip';
+
 export { Select, SearchableSelect } from './Select';
-export { default as Spinner } from './Spinner';
 export type { SelectOption } from './Select';
-// radio group
+
+export { default as Spinner } from './Spinner';
+
+/* -------------------------------- RADIO GROUP -------------------------------- */
+
 export { default as RadioGroup } from './RadioGroup';
 export type { RadioMenuItem } from './RadioGroup';
 
-// multichip input
+/* ------------------------------ MULTI CHIP INPUT ----------------------------- */
+
 export { default as MultiChipInput } from './MultichipInput';
 
-// dialog
+/* --------------------------------- DIALOG --------------------------------- */
+
 export { default as Dialog } from './Dialog';
 
 export { default as Stepper } from './Stepper';
@@ -49,6 +58,7 @@ export { default as Toggle } from './Toggle';
 export { default as MultiSelect } from './MultiSelect';
 
 export { default as SelectFeature } from './SelectFeature';
+
 export { default as FeatureMultiSelect } from './FeatureMultiSelect';
 
 export { default as Checkbox } from './Checkbox';
@@ -68,14 +78,18 @@ export { default as NoDataCard } from './NoDataCard';
 export { default as CodeBlock } from './CodeBlock';
 
 export { default as Label } from './Label';
+
 export { Combobox } from './Combobox';
 export type { ComboboxOption, ComboboxProps } from './Combobox';
+
 export { default as PaymentUrlSuccessDialog } from './PaymentUrlSuccessDialog';
 
-// New billing tier components
+/* ------------------------- BILLING TIER COMPONENTS -------------------------- */
+
 export { default as DecimalUsageInput } from './DecimalUsageInput';
 
-// Error Boundary
+/* ------------------------------ ERROR BOUNDARY ------------------------------ */
+
 export { default as ErrorBoundary } from './ErrorBoundary';
 
 export { default as Tooltip } from './Tooltip';

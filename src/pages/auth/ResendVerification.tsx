@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import Button from '@/components/atoms/Button/Button';
+import { Button } from '@/components/atoms/Button/Button';
 import Input from '@/components/atoms/Input/Input';
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';

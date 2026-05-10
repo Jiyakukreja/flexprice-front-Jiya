@@ -34,7 +34,7 @@ const ServiceAccountsPage = () => {
 	const serviceAccountColumns: ColumnData<User>[] = [
 		{
 			title: 'ID',
-			render(rowData: User) {
+			render: (rowData: User) => {
 				const displayId = rowData.id;
 				const prefix = displayId.slice(0, 8);
 				const suffix = displayId.slice(-4);
@@ -49,7 +49,7 @@ const ServiceAccountsPage = () => {
 		},
 		{
 			title: 'Type',
-			render() {
+			render: () => {
 				return (
 					<div className='flex gap-2 items-center'>
 						<div className='flex items-center gap-1.5 text-purple-600'>
@@ -62,7 +62,7 @@ const ServiceAccountsPage = () => {
 		},
 		{
 			title: 'Roles',
-			render(rowData: User) {
+			render: (rowData: User) => {
 				if (!rowData.roles || rowData.roles.length === 0) {
 					return <span className='text-gray-500 text-sm'>No Roles</span>;
 				}
@@ -82,7 +82,7 @@ const ServiceAccountsPage = () => {
 			title: 'Created At',
 			width: 150,
 			align: 'right',
-			render(rowData) {
+			render: (rowData: User) => {
 				return <span className='text-gray-600'>{formatDateShort(rowData.tenant?.created_at || rowData.tenant?.updated_at || '')}</span>;
 			},
 		},
@@ -115,6 +115,7 @@ const ServiceAccountsPage = () => {
 					tags={['Users']}
 				/>
 			)}
+
 			{(serviceAccountsResponse?.items.length || 0) > 0 && (
 				<Page>
 					<SectionHeader title='Service Accounts' titleClassName='text-3xl font-medium'>
@@ -122,8 +123,10 @@ const ServiceAccountsPage = () => {
 							Add
 						</Button>
 					</SectionHeader>
+
 					<div className='pb-12 mt-2'>
 						<FlexpriceTable showEmptyRow columns={serviceAccountColumns} data={serviceAccountsResponse?.items || []} />
+
 						<ShortPagination unit='Service Accounts' totalItems={serviceAccountsResponse?.pagination?.total || 0} />
 					</div>
 				</Page>
