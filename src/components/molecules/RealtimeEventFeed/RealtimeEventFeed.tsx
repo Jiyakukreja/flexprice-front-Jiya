@@ -1,5 +1,4 @@
 // src/components/molecules/RealtimeEventFeed/RealtimeEventFeed.tsx
-
 import { Activity, AlertTriangle, CheckCircle2, Clock3, CreditCard, Sparkles, Zap } from 'lucide-react';
 
 export interface EventItem {
